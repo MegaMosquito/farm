@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <title>Darling 3D Printers</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    .grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr;
+      gap: 24px; 
+    }
+    .tile { 
+      justify-content: center; /* Centers horizontally */
+      align-items: center;     /* Centers vertically */
+      width 320px;
+      background: #1e1e1e;
+      border: 2px solid #333; 
+      border-radius: 12px; 
+      overflow: hidden; 
+      text-decoration: none; 
+      color: inherit;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .tile:hover {
+      transform: translateY(-5px);
+      border-color: #007bff;
+    }
+    .tile h3 {
+      padding: 12px;
+      margin: 0;
+      text-align:
+      center; font-size: 1.1rem;
+    }
+    .stream-wrapper {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding-top: 75.00%;
+      border: 2px solid #333;
+      border-radius: 8px;
+    }
+    .stream-wrapper iframe, .stream-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1280px;  /* Virtual width */
+      height: 720px;  /* Virtual height */
+      border: none;
+      pointer-events: none;
+    }
+  </style>
+  <script>
+    function applyIframeTransforms() {
+      const wrapper = document.querySelector('.stream-wrapper');
+      if (!wrapper) return;
+      const wrapperWidth = wrapper.offsetWidth;
+      const contentWidth = 1280; /* Hard coded virtual size */
+      const scaleValue = wrapperWidth / contentWidth / 0.5;
+      const transformValue = `scale(${scaleValue})`;
+      document.querySelectorAll('.stream-wrapper iframe').forEach(frame => {
+        frame.style.transform = transformValue;
+        frame.style.transformOrigin = 'top left';
+      });
+    }
+    window.addEventListener('DOMContentLoaded', applyIframeTransforms);
+    window.addEventListener('resize', applyIframeTransforms);
+  </script>
+</head>
+<body>
+  <h1 style="text-align: center; margin-bottom: 30px;">Darling 3D Printers</h1>
+  <div class="grid">
+    {% for id, info in printers.items() %}
+      <a href="{{ url_for('printer_detail', printer_id=id) }}" class="tile">
+        <div class="stream-wrapper">
+          <iframe src="{{ info.cam_url_1 }}" scrolling="no"></iframe>
+        </div>
+        <h3>{{ info.name }}</h3>
+      </a>
+    {% endfor %}
+  </div>
+</body>
+</html>
+

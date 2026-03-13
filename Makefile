@@ -1,37 +1,34 @@
-
-DOCKERHUB_ID:=ibmosquito
-NAME:="flask-app-template"
-VERSION:="1.0.0"
-PORT:=80
-
-default: build run
+all: build run
 
 build:
-	docker build -t $(DOCKERHUB_ID)/$(NAME):$(VERSION) .
+	docker build -t ibmosquito/farm:1.0.0 -f Dockerfile .
 
-dev: stop build
-	docker run -it -v `pwd`:/outside \
-	  --name ${NAME} \
-	  -p 0.0.0.0:$(PORT):80 \
-	  $(DOCKERHUB_ID)/$(NAME):$(VERSION) /bin/bash
+dev: build stop
+	docker run -it --privileged \
+	    --name farm \
+	    -p 5000:5000 \
+	    --volume `pwd`:/outside \
+	    ibmosquito/farm:1.0.0 /bin/bash
 
 run: stop
-	docker run -d \
-	  --name ${NAME} \
-	  --restart unless-stopped \
-	  -p 0.0.0.0:$(PORT):80 \
-	  $(DOCKERHUB_ID)/$(NAME):$(VERSION)
+	docker run -d --privileged --restart unless-stopped \
+	    --name farm \
+	    -p 5000:5000 \
+	    ibmosquito/farm:1.0.0
 
 test:
-	curl localhost
+	echo "Connect to port 5000 on this host to test."
+
+exec:
+	docker exec -it farm /bin/sh
 
 push:
-	docker push $(DOCKERHUB_ID)/$(NAME):$(VERSION) 
+	docker push ibmosquito/farm:1.0.0
 
 stop:
-	@docker rm -f ${NAME} >/dev/null 2>&1 || :
+	-docker rm -f farm 2>/dev/null || :
 
-clean:
-	@docker rmi -f $(DOCKERHUB_ID)/$(NAME):$(VERSION) >/dev/null 2>&1 || :
+clean: stop
+	-docker rmi ibmosquito/farm:1.0.0 2>/dev/null || :
 
-.PHONY: build dev run push test stop clean
+.PHONY: all build dev run test exec push stop clean
